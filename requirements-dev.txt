@@ -1,0 +1,15 @@
+# Documentation
+docutils
+pygments
+Sphinx>=1.5.1
+sphinx_rtd_theme
+
+# Tests and Quality
+check-manifest
+flake8
+pytest
+readme-renderer
+tox
+
+# Release
+zest.releaser[recommended]

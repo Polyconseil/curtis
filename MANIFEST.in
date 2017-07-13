@@ -1,0 +1,6 @@
+include Readme.rst LICENSE.txt
+graft src/curtis
+prune docs
+prune tests
+exclude Changelog.rst requirements-dev.txt Makefile tox.ini
+global-exclude *.py[cod] __pycache__ *.so
