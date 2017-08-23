@@ -10,7 +10,7 @@ def read(file_path):
 
 setup(
     name='curtis',
-    version='0.1',
+    version='0.2.dev0',
     description="A simple sentry cli",
     long_description=read('README.rst'),
     classifiers=[
