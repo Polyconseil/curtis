@@ -1,4 +1,21 @@
 import datetime
+import functools
+import re
+
+
+def filter_regex_title(issues, regex):
+    for issue in issues:
+        if re.match(regex, issue.title):
+            yield issue
+
+
+def filter_title(issues, include, exclude):
+    return functools.reduce(
+        lambda filtered, regex: filter_regex_title(filtered, regex=regex),
+        list(map(lambda exp: re.compile(r'^.*%s.*$' % exp), include)) +
+        list(map(lambda exp: re.compile(r'^((?!%s).)*$' % exp), exclude)),
+        issues,
+    )
 
 
 def outdated(issues, days):
@@ -15,13 +32,13 @@ def max_age(issues, days, hours=0):
             yield issue
 
 
-def unseen(issues):
-    for issue in issues:
-        if not issue['hasSeen']:
-            yield issue
-
-
 def seen(issues):
     for issue in issues:
         if issue['hasSeen']:
+            yield issue
+
+
+def unseen(issues):
+    for issue in issues:
+        if not issue['hasSeen']:
             yield issue

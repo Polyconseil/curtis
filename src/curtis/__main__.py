@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import collections
+import functools
 import webbrowser
 
 import click
@@ -14,6 +15,26 @@ from . import utils
 
 DEFAULT_AGE_OF_ISSUES_TO_RESOLVE = 30  # days
 DEFAULT_AGE_OF_ISSUES_TO_MARK_AS_SEEN = 7  # days
+
+
+def with_title_filtering(fun):
+    @functools.wraps(fun)
+    @click.option(
+        '--include',
+        '-f',
+        multiple=True,
+        help="Patterns of issue titles to include (Python regular expression)",
+    )
+    @click.option(
+        '--exclude',
+        '-e',
+        multiple=True,
+        help="Patterns of issue titles to exclude (Python regular expression)",
+    )
+    def decorated(*args, **kwargs):
+        return fun(*args, **kwargs)
+
+    return decorated
 
 
 @click.group()
@@ -60,14 +81,16 @@ def assigned_issues_by_assignee(cfg):
     help="Age (in days) of to check",
     show_default=True,
 )
+@with_title_filtering
 @click.pass_obj
-def browse_unseen_issues(cfg, age):
+def browse_unseen_issues(cfg, age, include, exclude):
     """Browse unseen issues"""
     batch_size = 10
     msg_tpl = "Opening {} preceding unseen issues in browser? [Y/n | ^C to quit]"
 
     issues = client.opi_iterator(cfg, query='is:unresolved is:unassigned')
     issues = filters.unseen(filters.max_age(issues, days=age))
+    issues = filters.filter_title(issues, include, exclude)
 
     for issues in utils.grouper(output.tree_shaped(cfg, issues), batch_size):
         print('-' * 120)
@@ -95,13 +118,16 @@ def browse_unseen_issues(cfg, age):
     help="Issues with a trend ratio below this threshold are ignored",
     show_default=True,
 )
+@with_title_filtering
 @click.pass_obj
-def check_trends(cfg, period, threshold):
+def check_trends(cfg, period, threshold, include, exclude):
     """Show evolution stats for seen issues"""
     stats_period, days, hours = utils.decode_period(period)
 
     issues = client.opi_iterator(cfg, query='is:unresolved is:unassigned', statsPeriod=stats_period)
     issues = filters.max_age(filters.seen(issues), days=days, hours=hours)
+    issues = filters.filter_title(issues, include, exclude)
+
     for line, issue in output.tree_shaped(cfg, issues):
         if not issue:
             print(line)
@@ -114,7 +140,7 @@ def check_trends(cfg, period, threshold):
             issue,
         )
 
-        if False and level < 1:
+        if level < 1:  # Don't bother with issue
             continue
 
         print(
