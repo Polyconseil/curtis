@@ -17,7 +17,7 @@ def get_full_url(cfg, path_or_url):
 def get(cfg, path_or_url, params=None):
     return requests.get(
         get_full_url(cfg, path_or_url),
-        auth=utils.auth_token(cfg.token),
+        auth=utils.auth_token(cfg.auth_kind, cfg.token),
         params=params,
         timeout=cfg.timeout,
     )
@@ -28,7 +28,7 @@ def put(cfg, path_or_url, data, params=None):
     response = requests.put(
         full_url,
         json=data,
-        auth=utils.auth_token(cfg.token),
+        auth=utils.auth_token(cfg.auth_kind, cfg.token),
         timeout=cfg.timeout,
     )
 
@@ -36,7 +36,7 @@ def put(cfg, path_or_url, data, params=None):
         response = requests.put(
             full_url,
             json=data,
-            auth=utils.auth_token(cfg.token),
+            auth=utils.auth_token(cfg.auth_kind, cfg.token),
             timeout=cfg.timeout,
             headers={
                 'Content-Type': 'application/json',

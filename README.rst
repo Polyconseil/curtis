@@ -24,11 +24,14 @@ This file use the following format.
     url = https://sentry.foo..example.com
     # sentry API token (this one is a fake one generated using the apg command)
     token = IvlayltajPamthelwaj1
+    auth_kind = Bearer
 
     # settings for the bar site
     [site:bar]
     url = https://sentry.bar.example.org
+    # `username:password` base64 encoded if the nginx in front of sentry allows/enforces it
     token = TeinkutbicyeckyoQuoa
+    auth_kind = Basic
 
 Installation
 ------------

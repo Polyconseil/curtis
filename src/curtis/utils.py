@@ -2,14 +2,16 @@ import re
 
 import requests
 
+from . import config
+
 
 SENTRY_STAT_PERIOD_DAY = '24h'
 SENTRY_STAT_PERIOD_FORTNIGHT = '14d'
 
 
-def auth_token(token):
+def auth_token(auth_kind, token):
     def inner(request):
-        request.headers['Authorization'] = 'Basic {}'.format(token)
+        request.headers['Authorization'] = '{} {}'.format(auth_kind ,token)
         return request
     return inner
 

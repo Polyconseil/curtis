@@ -10,6 +10,9 @@ class CurtisConfig:
     DEFAULT_TIMEOUT = 10
     SITE_PREFIX = 'site:'
 
+    AUTH_KIND_BASIC = 'Basic'
+    AUTH_KIND_BEARER = 'Bearer'
+
     def __init__(self, config_file=None, site=None):
         self.parser = configparser.ConfigParser()
         self.parser.add_section('curtis')
@@ -42,6 +45,13 @@ class CurtisConfig:
     @property
     def url(self):
         return self._get_site_config('url')
+
+    @property
+    def auth_kind(self):
+        auth_kind = self._get_site_config('auth_kind', default=self.AUTH_KIND_BASIC)
+        if auth_kind not in (self.AUTH_KIND_BASIC, self.AUTH_KIND_BEARER):
+            raise RuntimeError('auth_kind parameter is not defined')
+        return auth_kind
 
     @property
     def token(self):
