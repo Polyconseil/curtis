@@ -233,5 +233,28 @@ def resolve_issues(cfg, age):
         print(line)
 
 
+@main.command(name='remove-issues')
+@click.option(
+    '--age',
+    default=DEFAULT_AGE_OF_ISSUES_TO_RESOLVE,
+    help='Age (in days) of entries to remove',
+    show_default=True,
+)
+@click.pass_obj
+def remove_issues(cfg, age):
+    """
+    Remove outdated issues.
+
+    No action is performed on commented or assigned issues.
+    """
+    issues = client.opi_iterator(cfg, query='is:unresolved is:unassigned')
+    issues = filters.outdated(issues, days=age)
+    for line, issue in output.tree_shaped(cfg, issues):
+        # Preserve issue with comment (None issue is for display purpose)
+        if issue is not None and issue.numComments == 0:
+            line, _issue = utils.run_command(client.delete_issue, cfg, issue, line)
+        print(line)
+
+
 if __name__ == '__main__.py':
     main()

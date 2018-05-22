@@ -50,6 +50,34 @@ def put(cfg, path_or_url, data, params=None):
     return response
 
 
+def delete(cfg, path_or_url):
+    full_url = get_full_url(cfg, path_or_url)
+    response = requests.delete(
+        full_url,
+        auth=utils.auth_token(cfg.token),
+        timeout=cfg.timeout,
+        headers={
+            'Content-Type': 'application/json',
+            'referer': full_url,
+        },
+    )
+
+    if response.status_code != 200:
+        response = requests.delete(
+            full_url,
+            auth=utils.auth_token(cfg.token),
+            timeout=cfg.timeout,
+            headers={
+                'Content-Type': 'application/json',
+                'X-CSRFToken': response.cookies['sc'],
+                'referer': full_url,
+            },
+            cookies=response.cookies,
+        )
+
+    return response
+
+
 def page_iterator(cfg, url, params=None):
     next_url = url
     while next_url:
@@ -121,4 +149,11 @@ def resolve_issue(cfg, issue):
         cfg,
         'issues/{issue[id]}/'.format(issue=issue),
         {'status': 'resolved'},
+    )
+
+
+def delete_issue(cfg, issue):
+    return delete(
+        cfg,
+        'issues/{issue[id]}/'.format(issue=issue),
     )
